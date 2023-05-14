@@ -47,13 +47,24 @@ app.post('/user', (req, res) => {
 
     userNumber = number;
     // Generate a random OTP
-    otp = Math.floor(100000 + Math.random() * 900000);
 
-    // Save the user to the database
-    newUser = new User({ name, number, profilePhoto, email });
+    User.findOne({ $or: [{ email }, { number }] })
+        .then((existingUser) => {
+            if (existingUser) {
+                // User with the same email or number already exists
+                return res.status(400).json({ error: 'User already exists' });
+            }
+            else {
+                otp = Math.floor(100000 + Math.random() * 900000);
 
-    // sending the otp to the user
-    sendOTP(number, otp);
+                // Save the user to the database
+                newUser = new User({ name, number, profilePhoto, email });
+
+                // sending the otp to the user
+                sendOTP(number, otp);
+                res.status(200).json({ message: "OTP sent!" });
+            }
+        })
 });
 
 app.post("/user/verify", (req, res) => {
@@ -71,6 +82,9 @@ app.post("/user/verify", (req, res) => {
                 console.error('Error creating user:', err);
                 res.status(500).json({ error: 'Failed to create user' });
             });
+    }
+    else {
+        res.status(400).json({ error: "OTP didn't matched! Try Again." });
     }
 
 })
