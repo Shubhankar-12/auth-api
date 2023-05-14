@@ -40,6 +40,7 @@ const sendOTP = (number, otp) => {
 }
 
 const verifyOtp = (sentOTP, recievedOtp) => sentOTP === recievedOtp;
+
 let newUser, otp, userNumber;
 app.post('/user', (req, res) => {
     const { name, number, profilePhoto, email } = req.body;
@@ -50,19 +51,20 @@ app.post('/user', (req, res) => {
 
     // Save the user to the database
     newUser = new User({ name, number, profilePhoto, email });
-    console.log(typeof otp);
+
+    // sending the otp to the user
     sendOTP(number, otp);
 });
 
 app.post("/user/verify", (req, res) => {
     const { enteredOtp } = req.body;
-    console.log(typeof enteredOtp);
+
     if (verifyOtp(otp, enteredOtp)) {
         newUser.save()
             .then(() => {
                 // Generate a JWT token with the user's phone number and OTP
                 const token = jwt.sign({ userNumber, otp }, process.env.JWT_SECRET);
-                console.log(token);
+                // console.log(token);
                 res.json({ token });
             })
             .catch((err) => {
