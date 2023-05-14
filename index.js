@@ -52,8 +52,6 @@ app.post('/user', (req, res) => {
     newUser = new User({ name, number, profilePhoto, email });
     console.log(typeof otp);
     sendOTP(number, otp);
-    res.redirect("/user/verify");
-    console.log("redirected");
 });
 
 app.post("/user/verify", (req, res) => {
